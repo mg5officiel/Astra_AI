@@ -1,6 +1,5 @@
 package com.WebVipers.gemini.service;
 
-import com.WebVipers.gemini.dto.ExtractedField;
 import com.WebVipers.gemini.dto.ExtractionResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,8 +62,9 @@ public class GeminiApiService {
         );
 
         JsonNode response = restClient.post()
-                .uri("/v1beta/models/{model}:generateContent?key={key}", model, apiKey)
+                .uri("/v1beta/models/{model}:generateContent", model)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("x-goog-api-key", apiKey)
                 .body(request)
                 .retrieve()
                 .body(JsonNode.class);
