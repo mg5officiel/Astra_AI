@@ -20,7 +20,7 @@ public class ImageController {
 
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExtractionResponse> extract(@RequestParam("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) return ResponseEntity.badRequest().build();
+        if (file.isEmpty()) throw new IllegalArgumentException("Aucun fichier image n’a été envoyé.");
         return ResponseEntity.ok(geminiApiService.extractFromImage(file));
     }
 }
