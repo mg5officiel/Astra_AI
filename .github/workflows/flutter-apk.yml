@@ -14,22 +14,43 @@ jobs:
     defaults:
       run:
         working-directory: mobile
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
+
       - name: Generate Android project files
         run: flutter create --platforms=android --org=com.astraai .
-      - name: Get dependencies
+
+      - name: Install dependencies
         run: flutter pub get
+
+      - name: Apply official Astra launcher icon
+        shell: bash
+        run: |
+          mkdir -p android/app/src/main/res/drawable
+          cp assets/astra_launcher.xml android/app/src/main/res/drawable/astra_launcher.xml
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          s = p.read_text()
+          s = s.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@drawable/astra_launcher"')
+          s = s.replace('android:roundIcon="@mipmap/ic_launcher_round"', 'android:roundIcon="@drawable/astra_launcher"')
+          p.write_text(s)
+          PY
+
       - name: Analyze
         run: flutter analyze
+
       - name: Build release APK
         run: flutter build apk --release
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
