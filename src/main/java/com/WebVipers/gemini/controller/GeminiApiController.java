@@ -13,45 +13,26 @@ import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/gemini")
-@CrossOrigin(origins = "http://localhost:5173")
 public class GeminiApiController {
-
-    private static final Logger LOG = Logger.getLogger(GeminiApiController.class.getName());
 
     @Autowired
     private GeminiApiService geminiApiService;
 
-    @PostMapping("/process-image")
-    public ResponseEntity<HashMap<String, Object>> processImage(@RequestParam("file") MultipartFile file,
-                                                                @RequestParam("prompt") String prompt) {
-        LOG.info("\n\nINSIDE CLASS == GeminiApiController, METHOD == processImage(); ");
-
-        try {
-            JsonNode result = geminiApiService.getResponse(file, prompt);
-
-            if(result != null) {
-                LOG.info("\nImage processed successfully.");
-                LOG.info("\nEXITING METHOD == processImage() OF CLASS == GeminiApiController \n\n");
-                return getResponseFormat(HttpStatus.OK, "Image processed successfully", result);
-            } else {
-                LOG.info("\nImage processing failed.");
-                LOG.info("\nEXITING METHOD == processImage() OF CLASS == GeminiApiController \n\n");
-                return getResponseFormat(HttpStatus.INTERNAL_SERVER_ERROR, "Image processing failed", null);
-            }
-        } catch (Exception e) {
-            LOG.severe("\nError in processImage() method of GeminiApiController: " + e.getMessage());
-            LOG.info("\nEXITING METHOD == processImage() OF CLASS == GeminiApiController \n\n");
-            return getResponseFormat(HttpStatus.INTERNAL_SERVER_ERROR, "Critical Error: " + e.getLocalizedMessage(), null);
-        }
+    // Endpoint de test : POST /ia/ask  { "prompt": "..." }
+    @PostMapping("/ask")
+    public String ask(@RequestBody PromptRequest request) {
+        return geminiApiService.generateText(request.getPrompt());
     }
 
-    public ResponseEntity<HashMap<String, Object>> getResponseFormat(HttpStatus status, String message, Object data) {
-        int responseStatus = (status.equals(HttpStatus.OK)) ? 1 : 0;
+    public static class PromptRequest {
+        private String prompt;
 
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("responseCode", responseStatus);
-        map.put("message", message);
-        map.put("data", data);
-        return ResponseEntity.status(status).body(map);
+        public String getPrompt() {
+            return prompt;
+        }
+
+        public void setPrompt(String prompt) {
+            this.prompt = prompt;
+        }
     }
 }
