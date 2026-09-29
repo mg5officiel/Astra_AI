@@ -1,79 +1,60 @@
-# Traitement d'Images avec Google Gemini 1.5 Flash — Java Spring Boot (sans Vertex API)
+# Astra AI
 
-Une API Java Spring Boot pour interagir avec Google Gemini afin de télécharger des images, traiter des invites et générer du contenu facilement. Cette intégration utilise l'API gratuite de Google AI Studio pour une utilisation limitée, la rendant accessible aux développeurs intéressés par l'analyse d'images et la génération de contenu assistées par IA.
+Application d’extraction de données depuis une image avec Google Gemini.
 
----
+## Architecture
 
-# Intégration Java de l'API Google Gemini
+Flutter → Spring Boot → Gemini API → JSON structuré → Flutter
 
-Ce projet open-source fournit un service et un controller Java Spring Boot pour interagir avec les fonctionnalités de traitement d'images et de génération de contenu de Google Gemini via une API REST.
+- Frontend : Flutter
+- Backend : Spring Boot 3.3.5 / Java 17
+- IA : Gemini Developer API
+- Modèle par défaut : gemini-2.5-flash
+- Transport image : multipart/form-data vers Spring Boot, puis inline_data base64 vers Gemini
 
-## Présentation
+## API
 
-Cette intégration offre un moyen simplifié de télécharger des images, de les traiter avec une invite textuelle et de recevoir des réponses générées par le modèle Gemini de Google. Elle utilise une clé API gratuite disponible via Google AI Studio pour une utilisation limitée non commerciale, la rendant accessible pour des expérimentations. Ce projet est particulièrement utile pour ceux qui souhaitent explorer l'API Gemini de Google sans s'engager dans des offres payantes.
+### Vérification
+GET /api/health
 
-## Fonctionnalités
+### Extraction
+POST /api/extraction/image
 
-- **Téléchargement d'images** : Permet l'envoi d'images en multipart vers le service Google, pour analyse ou génération de contenu.
-- **Invites texte et image** : Combine des entrées image et texte pour des résultats de génération de contenu plus dynamiques.
-- **Configuration flexible** : Les clés API et les paramètres de requête sont facilement personnalisables.
-- **Open Source et personnalisable** : Conçu pour être modifiable selon divers cas d'usage, idéal pour les développeurs intéressés par les intégrations IA.
+Form-data :
+- file : image à analyser
 
-## Installation
+Réponse :
 
-### Prérequis
+{
+  "documentType": "Carte d’identité",
+  "fields": [
+    { "name": "Nom", "value": "DUPONT", "confidence": 0.98 }
+  ],
+  "confidence": 0.95,
+  "warnings": []
+}
 
-- **Java JDK** 11 ou version ultérieure
-- **Maven** : Pour gérer les dépendances et construire le projet
-- **Clé API Google** : Disponible via Google AI Studio pour accéder à l'API Gemini
+## Configuration Gemini
 
-### Étapes
+Configurer la clé API dans src/main/resources/application.properties :
 
-1. **Cloner le dépôt** :
+gemini.api-key=VOTRE_CLE_GEMINI
+gemini.model=gemini-2.5-flash
+gemini.base-url=https://generativelanguage.googleapis.com
 
-   ```bash
-   git clone https://github.com/yourusername/Google-Gemini-1.5-Flash-Image-Processing-Java-Spring-Boot-without-VertexAPI.git
-   cd Google-Gemini-1.5-Flash-Image-Processing-Java-Spring-Boot-without-VertexAPI
-   ```
+Pour un déploiement, il est préférable de fournir la clé via une variable d’environnement GEMINI_API_KEY et de ne jamais l’inclure dans Flutter.
 
-2. **Configurer la clé API** :  
-   Ouvrez le fichier `application.properties` et ajoutez votre clé API Google.
-   ```properties
-   google.api.key=VOTRE_CLE_API_GOOGLE
-   ```
+## Flutter
 
-## Utilisation
+Le frontend se trouve dans frontend/.
 
-L'API expose un endpoint pour télécharger des images et envoyer des invites, vous permettant d'interagir avec l'API Gemini de Google de manière transparente.
+cd frontend
+flutter create .
+flutter pub get
+flutter run
 
-### Endpoint : `POST /gemini/process-image`
+Pour Android Emulator, l’API locale est configurée sur http://10.0.2.2:8080. Pour un téléphone physique, remplacer cette adresse par l’adresse IP LAN du PC hébergeant Spring Boot.
 
-- **Paramètres** :
-    - `file` (MultipartFile) : Le fichier image à traiter.
-    - `prompt` (String) : L'invite textuelle associée à l'image pour guider la génération de contenu.
-- **Réponse** :
-    - L'endpoint retourne une structure JSON contenant un code de succès, un message et les données générées par Google Gemini.
+## Remarque
 
-**Exemple de requête (avec cURL)** :
-```bash
-curl -X POST "http://localhost:8080/gemini/process-image" \
-     -F "file=@/chemin/vers/votre/image.jpg" \
-     -F "prompt=Décrivez le contenu de cette image."
-```
-
-## Personnalisation
-
-Ce projet vous permet de modifier divers paramètres et la logique de traitement pour s'adapter à différentes applications :
-
-1. **Modifier les paramètres de requête** :
-   Ajustez les propriétés comme `temperature`, `topK` et `topP` dans la classe `GeminiApiService.java` pour contrôler la façon dont le modèle Gemini traite vos entrées, en influençant l'aléatoire et la créativité des résultats.
-
-2. **Analyser la réponse** :
-   Si votre application nécessite un format différent ou un sous-ensemble de la réponse, vous pouvez personnaliser la façon dont la réponse de Google Gemini est analysée ou formatée en modifiant la logique de traitement des réponses du service.
-
-3. **Étendre les fonctionnalités** :
-   Les utilisateurs peuvent ajouter des endpoints API supplémentaires ou s'intégrer davantage aux services IA de Google pour étendre les fonctionnalités au-delà des tâches initiales de génération d'images et de texte.
-
-## Licence
-
-Ce projet est sous licence MIT, qui autorise une large utilisation et modification. Consultez le fichier `LICENSE` pour plus de détails.
+L’extraction est volontairement générique : Gemini retourne uniquement les informations visibles et lisibles et ne doit pas inventer une valeur absente.
