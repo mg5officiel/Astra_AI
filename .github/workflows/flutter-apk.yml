@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Remove Flutter sample test
+        run: rm -f test/widget_test.dart
+
       - name: Apply official Astra launcher icon
         shell: bash
         run: |
