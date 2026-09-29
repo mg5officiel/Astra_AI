@@ -73,7 +73,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const Text(
             'Astra AI utilise Gemini directement depuis Flutter. '
             'La clé saisie ici est conservée dans le stockage sécurisé de l’appareil.',
-            height: 1.5,
+            style: TextStyle(height: 1.5),
           ),
           const SizedBox(height: 24),
           TextField(
