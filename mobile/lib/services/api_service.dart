@@ -110,11 +110,12 @@ Ajoute un avertissement si une zone est illisible. Retourne exclusivement le JSO
     }
 
     if (result.statusCode < 200 || result.statusCode >= 300) {
-      final message = decoded is Map<String, dynamic>
-          ? decoded['error']?['message']?.toString()
+      final error = decoded is Map<String, dynamic> ? decoded['error'] : null;
+      final message = error is Map<String, dynamic>
+          ? error['message']?.toString()
           : null;
       throw Exception(
-        message ?? 'Gemini a refusé la requête (' + result.statusCode.toString() + ').',
+        message ?? 'Gemini a refusé la requête (${result.statusCode}).',
       );
     }
 
