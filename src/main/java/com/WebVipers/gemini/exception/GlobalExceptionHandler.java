@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.client.RestClientException;
 
 import java.time.Instant;
 
@@ -25,6 +26,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     ResponseEntity<ApiError> state(IllegalStateException ex, WebRequest request) {
         return error(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(RestClientException.class)
+    ResponseEntity<ApiError> upstream(RestClientException ex, WebRequest request) {
+        return error(HttpStatus.BAD_GATEWAY, "Gemini est temporairement indisponible ou a refusé la requête.", request);
     }
 
     @ExceptionHandler(Exception.class)
